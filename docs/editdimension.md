@@ -24,9 +24,19 @@ What you pick decides what you edit:
 
 | You pick | It shows | Typing a new number |
 |---|---|---|
-| A straight edge | The box's length along that edge | Grows the box from its centre. `Grow=End` or `Grow=Start` keeps one end in place. |
-| A flat face | The distance to the face across | Moves the face you picked. |
+| A straight edge | The box's length along that edge | Changes it, holding the anchor (below). |
+| A flat face | The distance to the face across | Moves the face you picked; the face across holds. |
 | A fillet (its face or its curved edge) | Its radius | Changes that fillet. `0` removes it. |
+
+**The anchor** is what stays put when a length changes:
+
+- By default, a box standing on the construction plane stays on it: a box
+  drawn on Z=0 and made taller grows upwards, never through the plane.
+  Otherwise the low side holds (bottom, left, front).
+- `Anchor=Bottom`, `Middle` or `Top` picks a side (`Left`/`Right` along X,
+  `Front`/`Back` along Y; `Start`/`End` on a box turned off the world axes).
+- `Anchor=Point` asks for a point after the number: snap to a corner or
+  anywhere, and the box scales about it, so that point stays where it is.
 
 Nothing is stored on the object. The sizes and fillets are read back from the
 shape each time, and the box is only rebuilt if that reading reproduces it
@@ -42,8 +52,6 @@ See [Install a plugin](../README.md#install-a-plugin); the file is
 
 - Boxes and their fillets only, for now. A solid that is anything else (a
   cylinder, a box with a hole, a chamfer) is left alone with a message.
-- An edge has no "near end" when picked, so a length grows from the centre
-  unless you choose `Grow=End` or `Grow=Start`; pick a face to move one side.
 - The number is typed at the command line. Showing it beside the edge in the
   viewport needs a change to Serpentine3D itself.
 

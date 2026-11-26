@@ -25,6 +25,7 @@ FORK = "SlapBackers/Serpentine3D"
 
 PLUGINS = {
     "meshtosolid": {
+        "version": "0.2.0",
         "issue": 184,
         "branch": "stl-recognise-shapes",
         "modules": ["serpentine3d/core/mesh_recognise.py"],
@@ -35,6 +36,7 @@ PLUGINS = {
         ],
     },
     "editdimension": {
+        "version": "0.2.0",
         "issue": 182,
         "branch": "editable-dimensions",
         "modules": ["serpentine3d/core/box_dimensions.py"],
@@ -113,7 +115,7 @@ def _extract(match, branch, source, modules) -> str:
 def build(name: str, source: str | None = None) -> str:
     spec = PLUGINS[name]
     lines = [
-        f"# Serpentine3D Labs plugin: {name}",
+        f"# Serpentine3D Labs plugin: {name} {spec['version']}",
         "#",
         f"# A preview of a proposed Serpentine3D change "
         f"(chisomobanzi/Serpentine3D#{spec['issue']}).",
@@ -126,7 +128,9 @@ def build(name: str, source: str | None = None) -> str:
         f"{spec['branch']};",
         "# do not edit by hand. Home: "
         "https://github.com/SlapBackers/serpentine3d-labs",
+        "# Changes: see CHANGELOG.md there.",
         "",
+        f'__version__ = "{spec["version"]}"',
     ]
     parts = ["\n".join(lines)]
     for module in spec["modules"]:
@@ -139,6 +143,11 @@ def build(name: str, source: str | None = None) -> str:
         lambda m: _extract(m, spec["branch"], source, spec["modules"]),
         commands))
     return "\n\n".join(part.strip("\n") for part in parts) + "\n"
+
+
+def _changelog() -> str:
+    with open(os.path.join(ROOT, "CHANGELOG.md"), encoding="utf-8") as f:
+        return f.read()
 
 
 def main(argv=None) -> int:
@@ -158,6 +167,10 @@ def main(argv=None) -> int:
         if args.check:
             with open(path, encoding="utf-8") as f:
                 current = f.read()
+            if f"## {name} {PLUGINS[name]['version']}" not in _changelog():
+                stale += 1
+                print(f"{name}: CHANGELOG.md has no entry for "
+                      f"{PLUGINS[name]['version']}")
             if current != text:
                 stale += 1
                 print(f"{name}: out of date with its branch")

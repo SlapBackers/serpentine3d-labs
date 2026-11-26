@@ -74,3 +74,24 @@ def test_a_cylinder_is_left_alone(loaded):
     doc.selection.set_subobjects([(obj.id, "face", 0)])
     said = doc.run("editdimension", [])
     assert any("no dimensions to edit" in s for s in said)
+
+
+def _index_along_z(shape):
+    from OCP.BRepAdaptor import BRepAdaptor_Curve
+    from OCP.GeomAbs import GeomAbs_CurveType
+    from serpentine3d.core import geometry as g
+    for i, e in enumerate(g.edges_of(shape)):
+        c = BRepAdaptor_Curve(e)
+        if c.GetType() == GeomAbs_CurveType.GeomAbs_Line \
+                and abs(c.Line().Direction().Z()) > 0.999:
+            return i
+
+
+def test_a_box_on_the_plane_grows_upwards(loaded):
+    from serpentine3d.core import geometry as g
+    doc, obj = _box_doc()
+    doc.selection.set_subobjects([(obj.id, "edge", _index_along_z(obj.shape))])
+    doc.run("editdimension", ["50"])
+    lo, hi = g.bbox(doc.get("Box").shape)
+    assert lo[2] == pytest.approx(0, abs=1e-6)
+    assert hi[2] == pytest.approx(50)

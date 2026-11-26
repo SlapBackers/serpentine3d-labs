@@ -10,10 +10,15 @@ change is merged upstream.
 
 ## Plugins
 
-| Plugin | What it adds | Proposal | Status |
+| Plugin | Version | What it adds | Proposal |
 |---|---|---|---|
-| [meshtosolid](docs/meshtosolid.md) | Turn an imported STL into an editable solid with real flat faces and holes; split a mesh into its separate parts | [#184](https://github.com/chisomobanzi/Serpentine3D/issues/184) | Ready to try |
-| [editdimension](docs/editdimension.md) | Pick a box's edge, face or fillet and retype its size or radius; fillets keep their radius when the box grows | [#182](https://github.com/chisomobanzi/Serpentine3D/discussions/182) | Ready to try |
+| [meshtosolid](docs/meshtosolid.md) | 0.2.0 | Turn an imported STL into an editable solid with real flat faces and holes; split a mesh into its separate parts | [#184](https://github.com/chisomobanzi/Serpentine3D/issues/184) |
+| [editdimension](docs/editdimension.md) | 0.2.0 | Pick a box's edge, face or fillet and retype its size or radius, anchored where you choose; fillets keep their radius | [#182](https://github.com/chisomobanzi/Serpentine3D/discussions/182) |
+
+What changed in each version: [CHANGELOG.md](CHANGELOG.md). Every version is
+also a [release](https://github.com/SlapBackers/serpentine3d-labs/releases)
+with its file attached, to download it or go back to an earlier one. A
+plugin's version is in the first line of its file.
 
 ## Install a plugin
 
@@ -48,8 +53,10 @@ maintainer decides whether and how the change goes in.
    are never edited by hand.
 4. Every change is tested here against the latest Serpentine3D release and its
    current `main`, and the build checks that each plugin still matches its
-   branch.
-5. When the maintainer accepts the change, the branch becomes the pull
+   branch and that its version has a changelog entry.
+5. A new version gets an entry in [CHANGELOG.md](CHANGELOG.md), then
+   `python tools/release.py <plugin>` tags it and publishes the release.
+6. When the maintainer accepts the change, the branch becomes the pull
    request and the plugin is retired.
 
 Some parts of an idea can only live in Serpentine3D itself (a change to an
