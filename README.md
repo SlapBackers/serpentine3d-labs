@@ -13,6 +13,7 @@ change is merged upstream.
 | Plugin | What it adds | Proposal | Status |
 |---|---|---|---|
 | [meshtosolid](docs/meshtosolid.md) | Turn an imported STL into an editable solid with real flat faces and holes; split a mesh into its separate parts | [#184](https://github.com/chisomobanzi/Serpentine3D/issues/184) | Ready to try |
+| [editdimension](docs/editdimension.md) | Pick a box's edge, face or fillet and retype its size or radius; fillets keep their radius when the box grows | [#182](https://github.com/chisomobanzi/Serpentine3D/discussions/182) | Ready to try |
 
 ## Install a plugin
 
