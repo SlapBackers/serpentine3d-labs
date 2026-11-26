@@ -69,11 +69,11 @@ def test_a_fillet_takes_a_new_radius(loaded):
     assert radii == pytest.approx([3, 3, 3, 5])
 
 
-def test_a_cylinder_is_left_alone(loaded):
+def test_a_sphere_is_left_alone(loaded):
     from serpentine3d.core import geometry as g
     from serpentine3d.scripting import Document
     doc = Document()
-    obj = doc.add(g.make_cylinder((0, 0, 0), 5, 10), name="Tube")
+    obj = doc.add(g.make_sphere((0, 0, 0), 5), name="Ball")
     doc.selection.set_subobjects([(obj.id, "face", 0)])
     said = doc.run("editdimension", [])
     assert any("no dimensions to edit" in s for s in said)
