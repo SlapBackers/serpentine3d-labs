@@ -1,4 +1,7 @@
-"""editdimension loads into Serpentine3D and runs the #182 workflow."""
+"""editdimension loads into Serpentine3D and runs the #182 workflow.
+
+A length first asks for the point that stays put; "" is Enter, which takes
+the side offered."""
 
 import pytest
 
@@ -50,7 +53,7 @@ def test_an_edge_grows_the_box_and_the_fillets_stay(loaded):
     from serpentine3d.core import geometry as g
     doc, obj = _box_doc()
     doc.selection.set_subobjects([(obj.id, "edge", _index_along_x(obj.shape))])
-    doc.run("editdimension", ["50"])
+    doc.run("editdimension", ["", "50"])
     shape = doc.get("Box").shape
     lo, hi = g.bbox(shape)
     assert hi[0] - lo[0] == pytest.approx(50)
@@ -91,7 +94,43 @@ def test_a_box_on_the_plane_grows_upwards(loaded):
     from serpentine3d.core import geometry as g
     doc, obj = _box_doc()
     doc.selection.set_subobjects([(obj.id, "edge", _index_along_z(obj.shape))])
-    doc.run("editdimension", ["50"])
+    doc.run("editdimension", ["", "50"])
     lo, hi = g.bbox(doc.get("Box").shape)
     assert lo[2] == pytest.approx(0, abs=1e-6)
     assert hi[2] == pytest.approx(50)
+
+
+def test_a_hole_takes_a_new_diameter(loaded):
+    from serpentine3d.core import geometry as g
+    from serpentine3d.scripting import Document
+    plate = g.boolean_difference(g.make_box((0, 0, 0), 40, 30, 10),
+                                 g.make_cylinder((20, 15, -1), 3, 12))
+    doc = Document()
+    obj = doc.add(plate, name="Plate")
+    wall = _cylinders(obj.shape)[0][0]
+    doc.selection.set_subobjects([(obj.id, "face", wall)])
+    doc.run("editdimension", ["10"])
+    assert [r for _i, r in _cylinders(doc.get("Plate").shape)] \
+        == pytest.approx([5])
+
+
+def test_a_cylinder_takes_a_new_height_from_its_base(loaded):
+    from serpentine3d.core import geometry as g
+    from serpentine3d.scripting import Document
+    doc = Document()
+    obj = doc.add(g.make_cylinder((0, 0, 0), 10, 30), name="Rod")
+    wall = _cylinders(obj.shape)[0][0]
+    seam = next(i for i, e in enumerate(g.edges_of(obj.shape))
+                if _is_line(e))
+    doc.selection.set_subobjects([(obj.id, "edge", seam)])
+    doc.run("editdimension", ["", "50"])
+    lo, hi = g.bbox(doc.get("Rod").shape)
+    assert lo[2] == pytest.approx(0, abs=1e-6)
+    assert hi[2] == pytest.approx(50)
+    assert wall >= 0
+
+
+def _is_line(edge):
+    from OCP.BRepAdaptor import BRepAdaptor_Curve
+    from OCP.GeomAbs import GeomAbs_CurveType
+    return BRepAdaptor_Curve(edge).GetType() == GeomAbs_CurveType.GeomAbs_Line

@@ -36,13 +36,13 @@ PLUGINS = {
         ],
     },
     "editdimension": {
-        "version": "0.2.0",
+        "version": "0.3.0",
         "issue": 182,
         "branch": "editable-dimensions",
-        "modules": ["serpentine3d/core/box_dimensions.py"],
+        "modules": ["serpentine3d/core/solid_dimensions.py"],
         "summary": [
-            "editdimension  pick a box's edge, face or fillet and retype "
-            "its size or radius",
+            "editdimension  pick an edge or face and retype a size, fillet, "
+            "chamfer or hole",
         ],
     },
 }

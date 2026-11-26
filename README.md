@@ -13,7 +13,7 @@ change is merged upstream.
 | Plugin | Version | What it adds | Proposal |
 |---|---|---|---|
 | [meshtosolid](docs/meshtosolid.md) | 0.2.0 | Turn an imported STL into an editable solid with real flat faces and holes; split a mesh into its separate parts | [#184](https://github.com/chisomobanzi/Serpentine3D/issues/184) |
-| [editdimension](docs/editdimension.md) | 0.2.0 | Pick a box's edge, face or fillet and retype its size or radius, anchored where you choose; fillets keep their radius | [#182](https://github.com/chisomobanzi/Serpentine3D/discussions/182) |
+| [editdimension](docs/editdimension.md) | 0.3.0 | Pick an edge or face and retype a box's sizes, fillets, chamfers and holes, or a cylinder's diameter and height, holding the point you choose | [#182](https://github.com/chisomobanzi/Serpentine3D/discussions/182) |
 
 What changed in each version: [CHANGELOG.md](CHANGELOG.md). Every version is
 also a [release](https://github.com/SlapBackers/serpentine3d-labs/releases)

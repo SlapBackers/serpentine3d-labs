@@ -7,6 +7,24 @@ file attached, so an earlier one can be downloaded again.
 Versions are per plugin. Until a plugin's change is merged into Serpentine3D
 they stay below 1.0: 0.x.0 adds or changes behaviour, 0.x.y fixes it.
 
+## editdimension 0.3.0
+
+2026-11-26
+
+- **The point that stays put is always asked for**, before the new length:
+  click any point or snap to one, choose a side (`Bottom`, `Middle`, `Top`,
+  and so on), or press Enter for the side offered. What 0.2.0 chose on its
+  own is now just the Enter answer. Replaces the `Anchor=` option.
+- **Chamfers**: pick a chamfer's face to retype its distance (`0` removes
+  it); a box keeps its chamfers when it changes size.
+- **Holes** square to a side, through or blind: pick the wall or rim to
+  retype the diameter (`0` fills it), a blind hole's floor to retype its
+  depth. Holes stay where they are when the box changes size, and a blind
+  hole keeps its depth from the face it was drilled in.
+- **Cylinders**: the round side or a round edge gives the diameter (the axis
+  stays put), an end or the straight edge the height (with the same anchor
+  prompt as a box).
+
 ## editdimension 0.2.0
 
 2026-11-26
