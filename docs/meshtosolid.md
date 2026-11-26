@@ -26,15 +26,25 @@ bracket becomes a 50,000-face shell that won't boolean or fillet.
 3. **Checks the result** against the mesh (valid, closed, same volume). If it
    doesn't match, the mesh is left as it is, and the command says why.
 
-**Separate parts.** An STL exported from an assembly is often several pieces
-that don't touch. Each piece becomes its own object and is recognised on its
-own, the way Rhino lets you pick them. `splitdisjointmesh` (Rhino's name)
-splits a mesh into its pieces without converting anything.
+**Parts, not pieces.** An STL keeps no parts, only triangles, and a real file
+has far more pieces than parts: one product model of 733,000 triangles had
+1,916 pieces but 434 closed parts, the rest being open surfaces and fragments
+left by the export. `meshparts` makes each closed piece a part and puts every
+other piece in the smallest part around it; what belongs nowhere stays
+together as one loose mesh. It asks for the smallest part to keep separate
+(Enter keeps every one). `meshtosolid` works the same way, part by part.
+`splitdisjointmesh` (Rhino's name) still splits into every single piece.
+
+**Snapping to the mesh.** With the plugin loaded, an imported mesh's corners
+snap as end points and the centres of its holes and round bosses as centre
+points. Every command uses them: draw from a corner, put a construction plane
+through three corners, centre a circle on a hole.
 
 **Curved parts stay meshes.** A part that is mostly curved (a glass, a
-sculpture, a scan) has nothing worth rebuilding as faces, so it is spotted in
-a second or two and left as a light mesh instead of being turned into tens of
-thousands of faces.
+sculpture, a scan) has nothing worth rebuilding as faces, so it is left as a
+light mesh instead of being turned into tens of thousands of faces. A
+1,000,000-triangle test assembly splits into its parts in about 2 seconds
+and converts in about 4.5.
 
 The command line reports what happened, for example
 `Plate: 36,412 triangles became 8 faces (a straight extrusion).`
@@ -53,14 +63,17 @@ The command line reports what happened, for example
 
 ## Use
 
-Import an STL, select it, type `meshtosolid` and press Enter. To pick the
-pieces of a mesh apart without converting them, use `splitdisjointmesh`.
+Import an STL, select it and type `meshparts` to get its parts as separate
+meshes, or `meshtosolid` to convert the parts that can be into solids at the
+same time. Snapping to corners and hole centres works as soon as the plugin
+is loaded.
 
 To remove the plugin, delete `meshtosolid.py` from the plugins folder.
 
 ## Limits
 
-- The mesh must be closed (watertight).
+- Only closed parts are converted to solids; a part with open surfaces stays
+  a mesh (it still splits out and snaps).
 - Holes are rebuilt as true cylinders only on straight-extrusion parts. On
   other parts, flat faces merge but hole walls stay as triangles.
 - Spheres, cones and fillet rounds are not recognised yet; a part made mostly

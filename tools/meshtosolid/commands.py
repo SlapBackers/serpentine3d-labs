@@ -1,5 +1,31 @@
+from serpentine3d.commands.base import SelectReq
+
+
+def _snap_to_mesh_corners():
+    """Serpentine3D asks one function for every object's snap points, and
+    in the released app it gives a mesh none. Wrapping it there gives every
+    command the mesh's corners and hole centres; the branch changes that
+    function itself (core/snaps.py)."""
+    from serpentine3d.core import snaps
+    original = snaps._static_snap_points
+    if getattr(original, "_labs_mesh_snaps", False):
+        return
+
+    def with_mesh_snaps(shape):
+        if isinstance(shape, MeshShape):
+            return mesh_snap_points(shape)
+        return original(shape)
+
+    with_mesh_snaps._labs_mesh_snaps = True
+    snaps._static_snap_points = with_mesh_snaps
+
+
 def serpentine3d_plugin(ctx):
     base = ctx.requests()
+    command = ctx.command
+    _snap_to_mesh_corners()
+
+    # @extract serpentine3d/commands/organize.py::cmd_meshparts
 
     @ctx.command("meshtosolid")
     def cmd_meshtosolid(c):

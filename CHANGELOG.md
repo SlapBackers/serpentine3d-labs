@@ -7,6 +7,25 @@ file attached, so an earlier one can be downloaded again.
 Versions are per plugin. Until a plugin's change is merged into Serpentine3D
 they stay below 1.0: 0.x.0 adds or changes behaviour, 0.x.y fixes it.
 
+## meshtosolid 0.3.0
+
+2026-11-26
+
+- **`meshparts`: an STL splits into its parts, not every piece.** A real
+  product file (733,000 triangles) had 1,916 pieces but 434 closed parts; the
+  rest were open surfaces and fragments left by the export. Each closed piece
+  is now a part, and every other piece joins the smallest part around it (or
+  that it touches); what belongs nowhere stays together as one loose mesh. It
+  asks for the smallest part to keep separate; Enter keeps every one.
+- **Imported meshes snap**: corners as end points and the centres of holes
+  and round bosses as centre points, so any command can build on an STL: a
+  line from a corner, a plane through three corners, a circle on a hole.
+- **meshtosolid works part by part**, and is fast on big files: a
+  1,000,000-triangle test assembly splits into its parts in about 2 seconds
+  and converts in about 4.5, with 273 of 415 parts becoming clean solids.
+  Grouping is vectorised; a slow step that rescanned the whole part for every
+  flat face is gone.
+
 ## editdimension 0.3.0
 
 2026-11-26

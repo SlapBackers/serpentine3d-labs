@@ -58,7 +58,7 @@ def test_separate_pieces_become_separate_solids(loaded, tmp_path):
     doc.add(_two_plates(tmp_path), name="Parts")
     doc.run("meshtosolid", ["Parts", ""])
     assert doc.get("Parts") is None
-    for name in ("Parts 1", "Parts 2"):
+    for name in ("Parts part 1", "Parts part 2"):
         assert doc.get(name).kind == "solid"
         assert len(g.faces_of(doc.get(name).shape)) == 8
 
@@ -70,3 +70,26 @@ def test_splitdisjointmesh_makes_one_mesh_per_piece(loaded, tmp_path):
     doc.run("splitdisjointmesh", ["Parts", ""])
     assert doc.get("Parts 1").kind == "mesh"
     assert doc.get("Parts 2").kind == "mesh"
+
+
+def test_meshparts_keeps_open_bits_with_their_part(loaded, tmp_path):
+    from serpentine3d.core import geometry as g
+    from serpentine3d.core.mesh import MeshShape, merge
+    from serpentine3d.scripting import Document
+    case = _stl_mesh(g.make_box((0, 0, 0), 50, 40, 30), tmp_path)
+    pin = _stl_mesh(g.make_box((100, 0, 0), 5, 5, 20), tmp_path)
+    patch = MeshShape([[10, 10, 10], [12, 10, 10], [12, 12, 10]], [[0, 1, 2]])
+    doc = Document()
+    doc.add(merge([case, pin, patch]), name="Model")
+    said = doc.run("meshparts", ["Model", "", ""])
+    assert doc.get("Model part 1").kind == "mesh"
+    assert doc.get("Model part 2").kind == "mesh"
+    assert any("3 pieces make 2 parts" in s for s in said)
+
+
+def test_a_mesh_snaps_to_its_corners_with_the_plugin(loaded, tmp_path):
+    from serpentine3d.core import geometry as g
+    from serpentine3d.core.snaps import snap_points_for
+    mesh = _stl_mesh(g.make_box((0, 0, 0), 10, 20, 30), tmp_path)
+    ends = [p for p, kind in snap_points_for(mesh) if kind == "end"]
+    assert len(ends) == 8

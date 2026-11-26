@@ -25,14 +25,18 @@ FORK = "SlapBackers/Serpentine3D"
 
 PLUGINS = {
     "meshtosolid": {
-        "version": "0.2.0",
+        "version": "0.3.0",
         "issue": 184,
         "branch": "stl-recognise-shapes",
-        "modules": ["serpentine3d/core/mesh_recognise.py"],
+        "modules": ["serpentine3d/core/mesh_parts.py",
+                    "serpentine3d/core/mesh_snaps.py",
+                    "serpentine3d/core/mesh_recognise.py"],
         "summary": [
-            "meshtosolid        convert STL meshes into solids with real "
+            "meshparts          split an STL into its parts",
+            "meshtosolid        convert STL parts into solids with real "
             "flat faces and holes",
-            "splitdisjointmesh  split a mesh into its separate pieces",
+            "splitdisjointmesh  split a mesh into every separate piece",
+            "and: imported meshes snap to their corners and hole centres",
         ],
     },
     "editdimension": {
@@ -89,11 +93,31 @@ def _inlined(text: str, modules: list) -> str:
     plugin: `from serpentine3d.core import box_dimensions as bd` would look
     for a module the released app does not have."""
     for module in modules:
-        package, _, leaf = module[:-3].replace("/", ".").rpartition(".")
+        dotted = module[:-3].replace("/", ".")
+        package, _, leaf = dotted.rpartition(".")
         text = re.sub(
             rf"^([ \t]*)from {re.escape(package)} import {leaf} as (\w+)[ \t]*$",
             r"\1\2 = sys.modules[__name__]", text, flags=re.M)
+        # `from serpentine3d.core.mesh_parts import components`: the name is
+        # already defined in the plugin, so the import has nothing to do
+        text = re.sub(
+            rf"^([ \t]*)from {re.escape(dotted)} import [\w, ]+[ \t]*$",
+            r"\1pass  # carried in this plugin", text, flags=re.M)
     return text
+
+
+def _top_names(text: str) -> set:
+    import ast
+    names = set()
+    for node in ast.parse(text).body:
+        if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
+            names.add(node.name)
+        elif isinstance(node, ast.Assign):
+            names.update(t.id for t in node.targets if isinstance(t, ast.Name))
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target,
+                                                           ast.Name):
+            names.add(node.target.id)
+    return names
 
 
 def _extract(match, branch, source, modules) -> str:
@@ -133,9 +157,17 @@ def build(name: str, source: str | None = None) -> str:
         f'__version__ = "{spec["version"]}"',
     ]
     parts = ["\n".join(lines)]
+    defined = {}
     for module in spec["modules"]:
-        parts.append(_absolute_imports(_read(module, spec["branch"], source),
-                                       module))
+        text = _absolute_imports(_read(module, spec["branch"], source), module)
+        # modules joined into one file share one namespace: the same name
+        # in two of them would quietly become the last one's
+        for top in _top_names(text):
+            if top in defined:
+                raise SystemExit(f"{top} is defined in both {defined[top]} "
+                                 f"and {module}; rename one on the branch")
+            defined[top] = module
+        parts.append(_inlined(text, spec["modules"]))
     with open(os.path.join(ROOT, "tools", name, "commands.py"),
               encoding="utf-8") as f:
         commands = f.read()
