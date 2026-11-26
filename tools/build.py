@@ -49,6 +49,17 @@ PLUGINS = {
             "chamfer or hole",
         ],
     },
+    "attach": {
+        "version": "0.1.0",
+        "issue": 0,
+        "branch": "attach",
+        "modules": ["serpentine3d/core/attachments.py"],
+        "summary": [
+            "attach  attach an object to a face so it follows when the "
+            "face moves",
+            "detach  take an attachment away",
+        ],
+    },
 }
 
 # In tools/<plugin>/commands.py, a line `# @extract path::function` is
@@ -141,8 +152,9 @@ def build(name: str, source: str | None = None) -> str:
     lines = [
         f"# Serpentine3D Labs plugin: {name} {spec['version']}",
         "#",
-        f"# A preview of a proposed Serpentine3D change "
-        f"(chisomobanzi/Serpentine3D#{spec['issue']}).",
+        (f"# A preview of a proposed Serpentine3D change "
+         f"(chisomobanzi/Serpentine3D#{spec['issue']})." if spec["issue"]
+         else "# A preview of a change to be proposed to Serpentine3D."),
         "# Put this file in ~/.serpentine3d/plugins/ and restart Serpentine3D.",
         "# Commands:",
         *(f"#   {line}" for line in spec["summary"]),

@@ -7,6 +7,23 @@ file attached, so an earlier one can be downloaded again.
 Versions are per plugin. Until a plugin's change is merged into Serpentine3D
 they stay below 1.0: 0.x.0 adds or changes behaviour, 0.x.y fixes it.
 
+## attach 0.1.0
+
+2026-11-27
+
+- First preview of placement and anchoring: `attach` links an object to the
+  face it sits on, so it follows when that face moves. A cylinder on a cube
+  rides the cube's top when the cube gets taller, and stays with it when the
+  cube is moved.
+- Across the face it keeps, as chosen when attaching, its **distance** from a
+  point (a corner, an edge, any point; Enter for the centre), or its
+  **proportion** of the face (centred stays centred).
+- **One level by default**: a ball on the cylinder stays put when the cube
+  changes, unless its own link was made to follow a chain.
+- Nothing links by itself. `detach` takes a link away. A follower moved by
+  hand keeps its new place. Links are saved with the file (as user text), and
+  undo and redo carry them.
+
 ## meshtosolid 0.3.0
 
 2026-11-26
