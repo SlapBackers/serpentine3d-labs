@@ -1,24 +1,4 @@
-"""The plugin loads into Serpentine3D and its command converts a real STL."""
-
-import os
-import shutil
-
-import pytest
-
-HERE = os.path.dirname(os.path.abspath(__file__))
-PLUGIN = os.path.join(HERE, "..", "meshtosolid.py")
-
-
-@pytest.fixture(scope="module")
-def loaded(tmp_path_factory):
-    plugins = tmp_path_factory.mktemp("plugins")
-    shutil.copy(PLUGIN, plugins / "meshtosolid.py")
-    os.environ["SERP3D_PLUGIN_DIR"] = str(plugins)
-    os.environ["SERP3D_CONFIG"] = str(plugins / "settings.json")
-    from serpentine3d.plugins import load_plugins
-    names = load_plugins(None)
-    assert "meshtosolid" in names
-    return names
+"""meshtosolid loads into Serpentine3D and converts real STLs."""
 
 
 def _stl_mesh(shape, tmp_path):
