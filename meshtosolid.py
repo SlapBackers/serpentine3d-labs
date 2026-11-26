@@ -1,9 +1,11 @@
 # Serpentine3D plugin: try the meshtobrep prototype (#184) in the released app.
 #
 # Copy this file into ~/.serpentine3d/plugins/ and restart Serpentine3D.
-# It adds one command, `meshtosolid`, which does what the prototype branch's
-# meshtobrep does. Delete the file to remove it. Generated from
-# SlapBackers/Serpentine3D, branch stl-recognise-shapes.
+# It adds two commands:
+#   meshtosolid        what the prototype branch's meshtobrep does
+#   splitdisjointmesh  split a mesh into its separate pieces (Rhino's name)
+# Delete the file to remove them. Generated from SlapBackers/Serpentine3D,
+# branch stl-recognise-shapes.
 # Home: https://github.com/SlapBackers/serpentine3d-meshtosolid
 
 """Turn a closed triangle mesh back into the solid it was cut from.
@@ -51,6 +53,13 @@ _COPLANAR_DEG = 0.5
 # similar length, is inside an arc rather than at a corner.
 _SMOOTH_TURN_DEG = 25.0
 _SIMILAR_CHORDS = 2.5
+# The flat-regions pass only goes ahead when groups of at least this many
+# coplanar triangles cover most of the part, and the solid would not have
+# an unworkable number of faces.
+_FLAT_GROUP = 3
+_FOLD_DEG = 30.0        # sharper than this between faces is an edge drawn
+_MOST_CURVED = 0.5
+_MAX_FACES = 20000
 # Fewest points that make a whole loop a circle rather than a polygon: a
 # hexagon is a nut and an octagon is drawn on purpose, not a hole. Every
 # export of a round hole worth editing has more sides than this.
@@ -98,6 +107,75 @@ def recognise(mesh: MeshShape, tolerance: float | None = None) -> Recognised:
                               len(prepared.tris))
     shape = _flat_regions(prepared, tolerance)
     return Recognised(shape, "faces", _face_count(shape), len(prepared.tris))
+
+
+def convert_pieces(mesh: MeshShape, name: str, echo=None) -> list:
+    """[(name, shape)] for each separate piece of the mesh: a solid where
+    one was recognised, the piece itself, still a mesh, where not.
+
+    Shared by meshtobrep and the plugin, so both say the same things.
+    A lone piece keeps the mesh's name; several are numbered."""
+    say = echo or (lambda _text: None)
+    pieces = split_pieces(mesh)
+    if len(pieces) > 1:
+        say(f"{name}: {len(pieces)} separate parts.")
+    out = []
+    for k, piece in enumerate(pieces, 1):
+        label = name if len(pieces) == 1 else f"{name} {k}"
+        try:
+            found = recognise(piece)
+        except RecogniseError as exc:
+            say(f"{label}: left as a mesh, {exc}.")
+            out.append((label, piece))
+            continue
+        what = ("a straight extrusion" if found.kind == "extrusion"
+                else "flat faces")
+        say(f"{label}: {found.triangles:,} triangles became "
+            f"{found.faces:,} faces ({what}).")
+        out.append((label, found.shape))
+    return out
+
+
+# --- separate parts ---------------------------------------------------------
+
+def split_pieces(mesh: MeshShape) -> list:
+    """The mesh's separate pieces, largest first: Rhino's SplitDisjointMesh.
+
+    An STL has no notion of parts, but a file exported from an assembly is
+    several closed pieces that never touch. Each is found as the triangles
+    that reach one another through shared corners."""
+    points, canonical = _weld(np.asarray(mesh.vertices, np.float64))
+    tris = canonical[np.asarray(mesh.triangles, np.int64)]
+    if not len(tris):
+        return [mesh]
+    # Every corner takes the smallest label among the triangles it is in,
+    # then labels are chased to their root; repeated until nothing moves.
+    label = np.arange(len(points))
+    while True:
+        lowest = label[tris].min(axis=1)
+        moved = label.copy()
+        np.minimum.at(moved, tris.ravel(), np.repeat(lowest, 3))
+        while True:
+            chased = moved[moved]
+            if np.array_equal(chased, moved):
+                break
+            moved = chased
+        if np.array_equal(moved, label):
+            break
+        label = moved
+    owner = label[tris[:, 0]]
+    roots, piece_of, sizes = np.unique(owner, return_inverse=True,
+                                       return_counts=True)
+    if len(roots) == 1:
+        return [mesh]
+    piece_of = np.asarray(piece_of).ravel()
+    pieces = []
+    for k in np.argsort(-sizes, kind="stable"):
+        own = tris[piece_of == k]
+        used, local = np.unique(own, return_inverse=True)
+        pieces.append(MeshShape(points[used],
+                                np.asarray(local).reshape(-1, 3)))
+    return pieces
 
 
 # --- the mesh, welded and measured ------------------------------------------
@@ -489,6 +567,7 @@ def _build_extrusion(frame, profile, fitted, height):
 def _flat_regions(m: _Prepared, tolerance: float):
     """Each run of coplanar neighbours as one face, the rest as triangles."""
     region = _coplanar_groups(m, tolerance)
+    _worth_rebuilding(m, region)
     faces = []
     loose = []
     for label in np.unique(region):
@@ -515,6 +594,34 @@ def _flat_regions(m: _Prepared, tolerance: float):
     if checked is None:
         raise RecogniseError("the rebuilt solid does not match the mesh")
     return checked
+
+
+def _worth_rebuilding(m: _Prepared, region: np.ndarray):
+    """Refuse, before any kernel work, a part that is mostly curved.
+
+    A curved surface is meshed in strips of flat four-sided patches, two
+    triangles each, which merge into faces that help nobody edit it: a
+    rendering model of a glass would come back as a hundred thousand faces
+    after minutes of sewing. Size alone cannot tell such a patch from a
+    box's side, which is two triangles too. Its edges can: a real face
+    meets a neighbour at a fold somewhere, while a patch on a curve meets
+    every neighbour almost flat. A group is a face when it is large or
+    has a fold on its border, and faces have to make up most of the part."""
+    labels, group_of, sizes = np.unique(region, return_inverse=True,
+                                        return_counts=True)
+    group_of = np.asarray(group_of).ravel()
+    a, b = m.pairs[:, 0], m.pairs[:, 1]
+    border = group_of[a] != group_of[b]
+    fold = border & (np.einsum("ij,ij->i", m.normals[a], m.normals[b])
+                     < math.cos(math.radians(_FOLD_DEG)))
+    is_face = sizes >= _FLAT_GROUP
+    is_face[group_of[a[fold]]] = True
+    is_face[group_of[b[fold]]] = True
+    loose = int(sizes[~is_face].sum())
+    faces = int(is_face.sum()) + loose
+    if loose > len(region) * _MOST_CURVED or faces > _MAX_FACES:
+        raise RecogniseError("too little of it is flat to be worth "
+                             "rebuilding")
 
 
 def _coplanar_groups(m: _Prepared, tolerance: float) -> np.ndarray:
@@ -653,19 +760,36 @@ def serpentine3d_plugin(ctx):
         (prototype of meshtobrep from #184)."""
         objs = yield base.SelectReq("Select meshes to convert",
                                     kinds=("mesh",))
-        from serpentine3d.core.mesh import brep_from_mesh
-        done = 0
+        solids = meshes = 0
         for o in objs:
-            try:
-                found = recognise(o.shape)
-            except RecogniseError as exc:
-                c.echo(f"{o.name}: kept as triangles, {exc}.")
-                c.scene.replace_shape(o.id, brep_from_mesh(o.shape))
+            results = convert_pieces(o.shape, o.name, c.echo)
+            if len(results) == 1:
+                c.scene.replace_shape(o.id, results[0][1])
+            else:
+                with c.scene.batched():
+                    for name, shape in results:
+                        c.scene.add(shape, name=name, layer_id=o.layer_id)
+                    c.scene.remove(o.id)
+            for _name, shape in results:
+                if isinstance(shape, MeshShape):
+                    meshes += 1
+                else:
+                    solids += 1
+        c.echo(f"{solids} solid(s) made"
+               + (f", {meshes} part(s) left as meshes." if meshes else "."))
+
+    @ctx.command("splitdisjointmesh")
+    def cmd_splitdisjointmesh(c):
+        """Split meshes into their separate pieces, one object each."""
+        objs = yield base.SelectReq("Select meshes to split", kinds=("mesh",))
+        for o in objs:
+            pieces = split_pieces(o.shape)
+            if len(pieces) == 1:
+                c.echo(f"{o.name} is already one piece.")
                 continue
-            c.scene.replace_shape(o.id, found.shape)
-            what = ("a straight extrusion" if found.kind == "extrusion"
-                    else "flat faces")
-            c.echo(f"{o.name}: {found.triangles:,} triangles became "
-                   f"{found.faces:,} faces ({what}).")
-            done += 1
-        c.echo(f"Recognised {done} mesh(es).")
+            with c.scene.batched():
+                for k, piece in enumerate(pieces, 1):
+                    c.scene.add(piece, name=f"{o.name} {k}",
+                                layer_id=o.layer_id)
+                c.scene.remove(o.id)
+            c.echo(f"{o.name}: split into {len(pieces)} pieces.")

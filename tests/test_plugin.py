@@ -55,5 +55,38 @@ def test_a_part_with_nothing_to_find_is_still_converted(loaded):
     doc = Document()
     doc.add(tetra, name="Tetra")
     said = doc.run("meshtosolid", ["Tetra", ""])
-    assert any("kept as triangles" in s for s in said)
-    assert len(g.faces_of(doc.get("Tetra").shape)) == 4
+    assert any("Tetra: left as a mesh" in s for s in said)
+    assert doc.get("Tetra").kind == "mesh"
+
+
+def _two_plates(tmp_path):
+    from serpentine3d.core import geometry as g
+    from serpentine3d.core.mesh import merge
+    plate = g.make_box((0, 0, 0), 60, 40, 8)
+    for x in (15, 45):
+        plate = g.boolean_difference(plate,
+                                     g.make_cylinder((x, 20, -1), 3, 10))
+    a = _stl_mesh(plate, tmp_path)
+    b = _stl_mesh(g.translate(plate, (0, 100, 0)), tmp_path)
+    return merge([a, b])
+
+
+def test_separate_pieces_become_separate_solids(loaded, tmp_path):
+    from serpentine3d.core import geometry as g
+    from serpentine3d.scripting import Document
+    doc = Document()
+    doc.add(_two_plates(tmp_path), name="Parts")
+    doc.run("meshtosolid", ["Parts", ""])
+    assert doc.get("Parts") is None
+    for name in ("Parts 1", "Parts 2"):
+        assert doc.get(name).kind == "solid"
+        assert len(g.faces_of(doc.get(name).shape)) == 8
+
+
+def test_splitdisjointmesh_makes_one_mesh_per_piece(loaded, tmp_path):
+    from serpentine3d.scripting import Document
+    doc = Document()
+    doc.add(_two_plates(tmp_path), name="Parts")
+    doc.run("splitdisjointmesh", ["Parts", ""])
+    assert doc.get("Parts 1").kind == "mesh"
+    assert doc.get("Parts 2").kind == "mesh"

@@ -23,7 +23,17 @@ bracket becomes a 50,000-face shell that won't boolean or fillet.
 2. **Other parts**: merges coplanar triangles into single flat faces. Curved
    areas stay as triangles.
 3. **Checks the result** against the mesh (valid, closed, same volume). If it
-   doesn't match, the mesh is converted the old way, and the command says why.
+   doesn't match, the mesh is left as it is, and the command says why.
+
+**Separate parts.** An STL exported from an assembly is often several pieces
+that don't touch. Each piece becomes its own object and is recognised on its
+own, the way Rhino lets you pick them. `splitdisjointmesh` (Rhino's name)
+splits a mesh into its pieces without converting anything.
+
+**Curved parts stay meshes.** A part that is mostly curved (a glass, a
+sculpture, a scan) has nothing worth rebuilding as faces, so it is spotted in
+a second or two and left as a light mesh instead of being turned into tens of
+thousands of faces.
 
 The command line reports what happened, for example
 `Plate: 36,412 triangles became 8 faces (a straight extrusion).`
@@ -42,7 +52,8 @@ The command line reports what happened, for example
 
 ## Use
 
-Import an STL, select it, type `meshtosolid` and press Enter.
+Import an STL, select it, type `meshtosolid` and press Enter. To pick the
+pieces of a mesh apart without converting them, use `splitdisjointmesh`.
 
 To remove the plugin, delete `meshtosolid.py` from the plugins folder.
 
@@ -51,7 +62,8 @@ To remove the plugin, delete `meshtosolid.py` from the plugins folder.
 - The mesh must be closed (watertight).
 - Holes are rebuilt as true cylinders only on straight-extrusion parts. On
   other parts, flat faces merge but hole walls stay as triangles.
-- Spheres, cones and fillet rounds are not recognised yet.
+- Spheres, cones and fillet rounds are not recognised yet; a part made mostly
+  of them stays a mesh.
 
 ## Feedback
 
