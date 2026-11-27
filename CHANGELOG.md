@@ -7,6 +7,14 @@ file attached, so an earlier one can be downloaded again.
 Versions are per plugin. Until a plugin's change is merged into Serpentine3D
 they stay below 1.0: 0.x.0 adds or changes behaviour, 0.x.y fixes it.
 
+## attach 0.1.2
+
+2026-11-27
+
+- Proposed upstream as
+  [Serpentine3D#186](https://github.com/chisomobanzi/Serpentine3D/discussions/186);
+  the plugin's first lines now link to it. No change in behaviour.
+
 ## attach 0.1.1
 
 2026-11-27

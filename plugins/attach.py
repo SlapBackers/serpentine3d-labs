@@ -1,6 +1,6 @@
-# Serpentine3D Labs plugin: attach 0.1.1
+# Serpentine3D Labs plugin: attach 0.1.2
 #
-# A preview of a change to be proposed to Serpentine3D.
+# A preview of a proposed Serpentine3D change (chisomobanzi/Serpentine3D#186).
 # Put this file in ~/.serpentine3d/plugins/ and restart Serpentine3D.
 # Commands:
 #   attach  attach an object to a face so it follows when the face moves
@@ -11,7 +11,7 @@
 # do not edit by hand. Home: https://github.com/SlapBackers/serpentine3d-labs
 # Changes: see CHANGELOG.md there.
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 """Objects attached to a face, following it when it moves.
 

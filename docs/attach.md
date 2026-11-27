@@ -48,8 +48,9 @@ you didn't ask for are a source of surprises.
 
 ## Feedback
 
-Not yet proposed upstream; feedback is welcome on the labs repository's
-issues.
+Proposed upstream in
+[Serpentine3D#186](https://github.com/chisomobanzi/Serpentine3D/discussions/186):
+that is the place for what worked, what didn't, and the file that showed it.
 
 ## Where the code lives
 

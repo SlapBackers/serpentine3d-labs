@@ -50,8 +50,8 @@ PLUGINS = {
         ],
     },
     "attach": {
-        "version": "0.1.1",
-        "issue": 0,
+        "version": "0.1.2",
+        "issue": 186,
         "branch": "attach",
         "modules": ["serpentine3d/core/attachments.py"],
         "summary": [
