@@ -13,7 +13,7 @@ change is merged upstream.
 | Plugin | Version | What it adds | Proposal |
 |---|---|---|---|
 | [meshtosolid](docs/meshtosolid.md) | 0.3.0 | Split an STL into its real parts, snap to its corners and hole centres, and turn parts into editable solids with real flat faces and holes | [#184](https://github.com/chisomobanzi/Serpentine3D/issues/184) |
-| [attach](docs/attach.md) | 0.1.0 | Attach an object to the face it sits on, so it follows when that face moves, keeping its distance from a point or its share of the face | to be proposed |
+| [attach](docs/attach.md) | 0.1.1 | Attach an object to the face it sits on, so it follows when that face moves, keeping its distance from a point or its share of the face | to be proposed |
 | [editdimension](docs/editdimension.md) | 0.3.0 | Pick an edge or face and retype a box's sizes, fillets, chamfers and holes, or a cylinder's diameter and height, holding the point you choose | [#182](https://github.com/chisomobanzi/Serpentine3D/discussions/182) |
 
 What changed in each version: [CHANGELOG.md](CHANGELOG.md). Every version is

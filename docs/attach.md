@@ -23,7 +23,7 @@ From then on, up and down it rides the face, and sideways it keeps its place
 the way you chose, however the face changes: `editdimension`, the gumball, a
 move of the whole cube.
 
-`detach` takes a link away.
+`unattach` takes a link away.
 
 ## Chains
 
@@ -55,5 +55,5 @@ issues.
 
 On the
 [`attach` branch](https://github.com/SlapBackers/Serpentine3D/tree/attach)
-as `serpentine3d/core/attachments.py` and the `attach` and `detach`
+as `serpentine3d/core/attachments.py` and the `attach` and `unattach`
 commands; this plugin is built from it.

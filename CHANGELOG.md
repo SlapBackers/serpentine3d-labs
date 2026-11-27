@@ -7,6 +7,14 @@ file attached, so an earlier one can be downloaded again.
 Versions are per plugin. Until a plugin's change is merged into Serpentine3D
 they stay below 1.0: 0.x.0 adds or changes behaviour, 0.x.y fixes it.
 
+## attach 0.1.1
+
+2026-11-27
+
+- `detach` is now **`unattach`** (like `ungroup` and `unlock`): typing the
+  first four letters of a command runs it, and `deta` has to keep running
+  `detail`.
+
 ## attach 0.1.0
 
 2026-11-27

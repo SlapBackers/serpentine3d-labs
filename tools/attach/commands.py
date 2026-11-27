@@ -11,4 +11,4 @@ def serpentine3d_plugin(ctx):
 
     # @extract serpentine3d/commands/organize.py::cmd_attach
 
-    # @extract serpentine3d/commands/organize.py::cmd_detach
+    # @extract serpentine3d/commands/organize.py::cmd_unattach

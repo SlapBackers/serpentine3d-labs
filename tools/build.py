@@ -50,14 +50,14 @@ PLUGINS = {
         ],
     },
     "attach": {
-        "version": "0.1.0",
+        "version": "0.1.1",
         "issue": 0,
         "branch": "attach",
         "modules": ["serpentine3d/core/attachments.py"],
         "summary": [
             "attach  attach an object to a face so it follows when the "
             "face moves",
-            "detach  take an attachment away",
+            "unattach  take an attachment away",
         ],
     },
 }

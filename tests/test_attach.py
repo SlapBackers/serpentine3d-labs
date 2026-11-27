@@ -41,10 +41,10 @@ def test_proportion_keeps_it_centred(loaded):
         (30, 25), abs=1e-6)
 
 
-def test_detach_stops_it(loaded):
+def test_unattach_stops_it(loaded):
     from serpentine3d.core import geometry as g
     doc, cube = _scene()
     doc.run("attach", ["Cyl", "", "Distance", "No"])
-    doc.run("detach", ["Cyl", ""])
+    doc.run("unattach", ["Cyl", ""])
     doc.scene.replace_shape(cube.id, g.make_box((0, 0, 0), 40, 30, 35))
     assert g.bbox(doc.get("Cyl").shape)[0][2] == pytest.approx(20, abs=1e-6)
