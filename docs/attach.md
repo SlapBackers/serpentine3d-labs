@@ -3,48 +3,69 @@
 [← Serpentine3D Labs](../README.md)
 
 A [Serpentine3D](https://github.com/chisomobanzi/Serpentine3D) plugin for
-placement and anchoring. A cylinder stands on a cube; when the cube changes,
-the cylinder should follow in the way you chose.
+placement and anchoring. Put a cylinder on a cube's top, measured from two
+of its edges: when the cube gets taller, wider, moves or turns, the
+cylinder stays where you put it.
 
 ## Use
 
-1. Ctrl+Shift-click the face the object sits on (the cube's top).
-2. Type `attach`, then answer:
-   - **the object** to attach (the cylinder);
-   - **the point it is measured from**: snap to a corner, an edge or any
-     point, or press Enter for the face's centre;
-   - **how it keeps its place sideways**: `Distance` (its distance from that
-     point stays the same, like a hole dimensioned from an edge) or
-     `Proportion` (its share of the face stays the same, so centred stays
-     centred);
-   - **whether it follows a chain**: `No` (default) or `Yes` (below).
+Type `attach`, then:
 
-From then on, up and down it rides the face, and sideways it keeps its place
-the way you chose, however the face changes: `editdimension`, the gumball, a
-move of the whole cube.
+1. **Object to attach**: click the cylinder (or have it selected first).
+2. **Face to attach it to**: click the cube's top. The cylinder doesn't have
+   to be on it yet.
+3. **Side that sits on it**: click the cylinder's end, or press Enter for its
+   lowest side. It turns so that side lies flat on the face, and is put
+   down on it.
+4. **Edge to measure from**: click an edge of the face, or press Enter for
+   the nearest.
+5. **Distance from that edge**: type it, or press Enter to keep where it is.
+6. **Second edge**, across the first: click it, or Enter for the nearest.
+7. **Distance from that edge**: the same.
 
-`unattach` takes a link away.
+On the distance prompts, the **Keep** chip says what it holds when the face
+changes size: `Edge` (Enter) keeps the distance from the edge, `Share` keeps
+its share of the face, so centred stays centred.
 
-## Chains
+## What you see
 
-Put a ball on the cylinder and attach it to the cylinder's top. When the cube
-grows, the cylinder rides up. The ball does **not**, unless its link was made
-with "follow a chain" set to `Yes`: one level is the default, because links
-you didn't ask for are a source of surprises.
+- **Select the cylinder**: the cube's face is tinted, the two edges it is
+  measured from are drawn heavier, a dimension runs from each edge to it
+  (the distance, or the share as a %), and a badge says what it is
+  attached to. Properties shows the same under `attached to`.
+- **Select the cube**: whatever is attached to it is outlined, so you see
+  what will move with it.
 
-## Good to know
+## What follows
 
-- Nothing links by itself: only `attach` makes a link.
-- A follower moved by hand keeps its new place; the link measures it again.
-- Links are kept in the object's user text, so they are saved with the file,
-  and undo and redo carry them.
+- **Up and down** it rides the face; **across** it keeps its distances (or
+  shares) from the two edges, however the face changes: `editdimension`,
+  the gumball, `move`, `scale`.
+- **Turning** the cube swings it round and turns it with the cube.
+- **Stacks move as stacks**: a ball attached to the cylinder follows when the
+  cube grows.
+- If the face gets too small for it, it keeps its place and hangs over the
+  edge, and the command history says so.
+
+## What ends a link
+
+- **Moving it by hand**, even across the same face: the history says so.
+  Run `attach` again to give it a new place. Moving it together with the
+  cube (both selected) keeps the link.
+- **Deleting the cube**: it stays where it is, no longer attached. Undo
+  brings both back, attached.
+- `unattach` takes a link away.
+
+Links are kept in the object's user text, so they are saved with the file,
+and undo and redo carry them. Links made with 0.1.x are not read: attach
+those objects again.
 
 ## Limits
 
-- The face must be flat and on the outside of its object, and the object a
-  solid or surface (not a mesh) for now.
-- If the object carrying the face is turned, its followers don't follow the
-  turn yet.
+- The face must be flat, on a solid or surface (not a mesh).
+- Turning is read from the cube's flat faces: a parent with only two flat
+  faces facing each other (a cylinder) can't tell a turn about its own
+  axis.
 
 ## Feedback
 
@@ -55,6 +76,9 @@ that is the place for what worked, what didn't, and the file that showed it.
 ## Where the code lives
 
 On the
-[`attach` branch](https://github.com/SlapBackers/Serpentine3D/tree/attach)
-as `serpentine3d/core/attachments.py` and the `attach` and `unattach`
-commands; this plugin is built from it.
+[`attach` branch](https://github.com/SlapBackers/Serpentine3D/tree/attach):
+`serpentine3d/core/attachments.py`, the drawing in
+`serpentine3d/ui/attachment_marks.py`, and the `attach` and `unattach`
+commands. This plugin is built from it. What the pull request changes in
+Serpentine3D itself (drawing in the viewport, and moving several objects as
+one change) the plugin does from outside, at startup.

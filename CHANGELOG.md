@@ -7,6 +7,34 @@ file attached, so an earlier one can be downloaded again.
 Versions are per plugin. Until a plugin's change is merged into Serpentine3D
 they stay below 1.0: 0.x.0 adds or changes behaviour, 0.x.y fixes it.
 
+## attach 0.2.0
+
+2026-11-27
+
+Reworked from what testing 0.1 showed: it was hard to see and clunky to set
+up.
+
+- **You see the link.** A selected attached object shows its parent's face
+  tinted, the two edges it is measured from, a dimension from each edge
+  with its distance (or share), and a badge naming its parent; Properties
+  shows the same. A selected parent outlines what is attached to it.
+- **Object first, then the face**, with a plain click (no Ctrl+Shift). The
+  object needn't be on the face yet: pick the side of it that sits there
+  (Enter for its lowest) and it is turned and put down on the face.
+- **Measured from two edges**, one thing per prompt: an edge, its distance,
+  a second edge, its distance. Enter takes the nearest edge, or keeps the
+  distance where it is. The `Keep` chip chooses `Edge` (the distance holds)
+  or `Share` (its share of the face holds). Replaces the measured-from point
+  and the Distance/Proportion and chain questions.
+- **It turns with its parent**, and **stacks move as stacks**: the chain
+  option is gone, following a chain is what it does.
+- **Moving it by hand ends the link**, and so does deleting its parent
+  (undo brings both back); the history says so each time. Moving it
+  together with its parent keeps the link.
+- A follower pushed over the edge of a shrinking face stays put and the
+  history warns once.
+- Links made with 0.1.x are not read: attach those objects again.
+
 ## attach 0.1.2
 
 2026-11-27

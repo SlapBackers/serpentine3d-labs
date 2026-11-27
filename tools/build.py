@@ -50,14 +50,18 @@ PLUGINS = {
         ],
     },
     "attach": {
-        "version": "0.1.2",
+        "version": "0.2.0",
         "issue": 186,
         "branch": "attach",
-        "modules": ["serpentine3d/core/attachments.py"],
+        "modules": ["serpentine3d/core/attachments.py",
+                    "serpentine3d/ui/attachment_marks.py"],
         "summary": [
-            "attach  attach an object to a face so it follows when the "
-            "face moves",
+            "attach    put an object on a face, measured from two of its "
+            "edges, so it",
+            "          follows when the face moves or turns",
             "unattach  take an attachment away",
+            "and: a selected attached object shows its face, edges and "
+            "distances",
         ],
     },
 }
@@ -109,6 +113,9 @@ def _inlined(text: str, modules: list) -> str:
         text = re.sub(
             rf"^([ \t]*)from {re.escape(package)} import {leaf} as (\w+)[ \t]*$",
             r"\1\2 = sys.modules[__name__]", text, flags=re.M)
+        text = re.sub(
+            rf"^([ \t]*)from {re.escape(package)} import {leaf}[ \t]*$",
+            rf"\1{leaf} = sys.modules[__name__]", text, flags=re.M)
         # `from serpentine3d.core.mesh_parts import components`: the name is
         # already defined in the plugin, so the import has nothing to do
         text = re.sub(
